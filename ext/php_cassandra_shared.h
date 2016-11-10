@@ -486,6 +486,32 @@ void throw_invalid_argument(zval *object,
 #define PHP_CASSANDRA_INI_ENTRY_LOG_LEVEL \
   PHP_INI_ENTRY("cassandra.log_level", PHP_CASSANDRA_DEFAULT_LOG_LEVEL, PHP_INI_ALL, OnUpdateLogLevel)
 
+#define PHP_CASSANDRA_GLOBAL_DEFINITIONS \
+  CassUuidGen          *uuid_gen; \
+  pid_t                 uuid_gen_pid; \
+  unsigned int          persistent_clusters; \
+  unsigned int          persistent_sessions; \
+  php5to7_zval          type_varchar; \
+  php5to7_zval          type_text; \
+  php5to7_zval          type_blob; \
+  php5to7_zval          type_ascii; \
+  php5to7_zval          type_bigint; \
+  php5to7_zval          type_counter; \
+  php5to7_zval          type_int; \
+  php5to7_zval          type_varint; \
+  php5to7_zval          type_boolean; \
+  php5to7_zval          type_decimal; \
+  php5to7_zval          type_double; \
+  php5to7_zval          type_float; \
+  php5to7_zval          type_inet; \
+  php5to7_zval          type_timestamp; \
+  php5to7_zval          type_date; \
+  php5to7_zval          type_time; \
+  php5to7_zval          type_uuid; \
+  php5to7_zval          type_timeuuid; \
+  php5to7_zval          type_smallint; \
+  php5to7_zval          type_tinyint;
+
 PHP_INI_MH(OnUpdateLogLevel);
 PHP_INI_MH(OnUpdateLog);
 
@@ -498,39 +524,26 @@ int php_cassandra_mshutdown(SHUTDOWN_FUNC_ARGS);
 int php_cassandra_rinit(INIT_FUNC_ARGS);
 int php_cassandra_rshutdown(SHUTDOWN_FUNC_ARGS);
 
-ZEND_BEGIN_MODULE_GLOBALS(cassandra)
-  CassUuidGen          *uuid_gen;
-  pid_t                 uuid_gen_pid;
-  unsigned int          persistent_clusters;
-  unsigned int          persistent_sessions;
-  php5to7_zval          type_varchar;
-  php5to7_zval          type_text;
-  php5to7_zval          type_blob;
-  php5to7_zval          type_ascii;
-  php5to7_zval          type_bigint;
-  php5to7_zval          type_counter;
-  php5to7_zval          type_int;
-  php5to7_zval          type_varint;
-  php5to7_zval          type_boolean;
-  php5to7_zval          type_decimal;
-  php5to7_zval          type_double;
-  php5to7_zval          type_float;
-  php5to7_zval          type_inet;
-  php5to7_zval          type_timestamp;
-  php5to7_zval          type_date;
-  php5to7_zval          type_time;
-  php5to7_zval          type_uuid;
-  php5to7_zval          type_timeuuid;
-  php5to7_zval          type_smallint;
-  php5to7_zval          type_tinyint;
-ZEND_END_MODULE_GLOBALS(cassandra)
+#define PP_CAT_NE(a, b) a ## b
+#define PP_CAT(a, b) PP_CAT_NE(a, b)
+#define PP_DECLARE_MODULE_GLOBALS_NE(s) ZEND_DECLARE_MODULE_GLOBALS(s)
+#define PP_DECLARE_MODULE_GLOBALS(s) PP_DECLARE_MODULE_GLOBALS_NE(s)
+#define PP_EXTERN_MODULE_GLOBALS_NE(s) ZEND_EXTERN_MODULE_GLOBALS(s)
+#define PP_EXTERN_MODULE_GLOBALS(s) PP_EXTERN_MODULE_GLOBALS_NE(s)
+#ifndef PHP_DRIVER_MODULE_NAME
+#  define PHP_DRIVER_MODULE_NAME cassandra
+   ZEND_BEGIN_MODULE_GLOBALS(cassandra)
+     PHP_CASSANDRA_GLOBAL_DEFINITIONS
+   ZEND_END_MODULE_GLOBALS(cassandra)
+#endif
 
-ZEND_EXTERN_MODULE_GLOBALS(cassandra)
+PP_EXTERN_MODULE_GLOBALS(PHP_DRIVER_MODULE_NAME)
 
 #ifdef ZTS
-#  define CASSANDRA_G(v) TSRMG(cassandra_globals_id, zend_cassandra_globals *, v)
+#  define CASSANDRA_G(v) TSRMG(PP_CAT(PHP_DRIVER_MODULE_NAME, _globals_id), \
+    PP_CAT(zend_, PP_CAT(PHP_DRIVER_MODULE_NAME, _globals)) *, v)
 #else
-#  define CASSANDRA_G(v) (cassandra_globals.v)
+#  define CASSANDRA_G(v) (PP_CAT(PHP_DRIVER_MODULE_NAME, _globals.v))
 #endif
 
 #endif /* PHP_CASSANDRA_SHARED_H */

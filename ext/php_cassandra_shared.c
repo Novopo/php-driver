@@ -36,7 +36,7 @@ static uv_once_t log_once = UV_ONCE_INIT;
 static char *log_location = NULL;
 static uv_rwlock_t log_lock;
 
-ZEND_DECLARE_MODULE_GLOBALS(cassandra)
+PP_DECLARE_MODULE_GLOBALS(PHP_DRIVER_MODULE_NAME)
 
 static void
 php_cassandra_log(const CassLogMessage *message, void *data);
